@@ -1,2 +1,6 @@
-# noisy_ssl
-Studying the behaviour of SSL objectives in presence of noise 
+# Studying the behaviour of SSL objectives in presence of noise 
+
+## Environment setup
+```
+virtualenv --system-site-packages -p python3 env_ssl
+```
