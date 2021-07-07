@@ -9,10 +9,12 @@ pip install -r requirements.txt
 
 We train contrastive and non-contrastive SSL models (with lightly) using unlabeled CIFAR-10 training images; follwed by training an image classifier model using noisy CIFAR-10 data (with different levels of symmetric and assymetric noise). We evaluate the classifier on (noise-free) CIFAR-10 test set.
 
+### Train MoCo 
 '''
-#Train MoCo 
 python moco/train_moco.py --max-epochs 1000
+'''
 
-#Train Classifier
+### Train Classifier
+'''
 python moco/train_classifier.py --max-epochs 100
 '''
