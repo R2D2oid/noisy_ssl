@@ -11,7 +11,7 @@ We train contrastive and non-contrastive SSL models (with lightly) using unlabel
 
 ### Train MoCo 
 ```
-python moco/train_moco.py --max-epochs 1000 --batch-size 512 --backbone-model resnet-50 --num-fltrs 2048
+python training_scripts/train_moco.py --max-epochs 1000 --batch-size 512 --backbone-model resnet-50 --num-fltrs 2048
 ```
 
 ### Train Classifier
