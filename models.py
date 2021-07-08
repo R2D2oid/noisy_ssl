@@ -57,6 +57,7 @@ class MocoModel(pl.LightningModule):
         y0, y1 = self.resnet_moco(x0, x1)
         loss = self.criterion(y0, y1)
         self.log('train_loss_ssl', loss)
+        self.log('train_moco_lr',self.scheduler.optimizer.param_groups[0]['lr'])
         return loss
 
     def training_epoch_end(self, outputs):
@@ -66,8 +67,8 @@ class MocoModel(pl.LightningModule):
     def configure_optimizers(self):
         optim = torch.optim.SGD(self.resnet_moco.parameters(), lr=self.lr,
                                 momentum=self.momentum, weight_decay=self.weight_decay)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, self.max_epochs)
-        return [optim], [scheduler]
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, self.max_epochs)
+        return [optim], [self.scheduler]
     
     
 class Classifier(pl.LightningModule):
@@ -109,6 +110,7 @@ class Classifier(pl.LightningModule):
         y_hat = self.forward(x)
         loss = nn.functional.cross_entropy(y_hat, y)
         self.log('train_loss_fc', loss)
+        self.log('train_fc_lr',self.scheduler.optimizer.param_groups[0]['lr'])
         return loss
 
     def training_epoch_end(self, outputs):
@@ -124,5 +126,5 @@ class Classifier(pl.LightningModule):
 
     def configure_optimizers(self):
         optim = torch.optim.SGD(self.fc.parameters(), lr=self.lr)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, self.max_epochs)
-        return [optim], [scheduler]
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, self.max_epochs)
+        return [optim], [self.scheduler]
