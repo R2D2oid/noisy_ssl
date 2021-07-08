@@ -23,6 +23,8 @@ parser.add_argument('--batch-size', default=512, type=int, metavar='N',
                     help='mini-batch size')
 parser.add_argument('--memory-bank-size', default=4096, type=int, metavar='N',
                     help='memory bank size')
+parser.add_argument('--backbone-model', default='resnet-50', type=str,
+                    help='backbone model architechture')
 
 args = parser.parse_args()
 
@@ -53,7 +55,7 @@ dataloader_train_moco = torch.utils.data.DataLoader(
 gpus = 1 if torch.cuda.is_available() else 0
 
 # Train MoCo model
-model = MocoModel()
+model = MocoModel(backbone_type = args.backbone_model)
 trainer = pl.Trainer(max_epochs=args.max_epochs, gpus=gpus, progress_bar_refresh_rate=100)
 trainer.fit(
     model,
