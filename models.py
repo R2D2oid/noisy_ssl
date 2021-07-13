@@ -8,6 +8,8 @@ import lightly
 import torch
 from torch import nn
 
+from utils import knn_predict, BenchmarkModule
+
 class MocoModel(pl.LightningModule):
     def __init__(self, 
                  backbone_type='resnet-18', 
@@ -65,12 +67,122 @@ class MocoModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        optim = torch.optim.SGD(self.resnet_moco.parameters(), lr=self.lr,
-                                momentum=self.momentum, weight_decay=self.weight_decay)
+        optim = torch.optim.SGD(self.resnet_moco.parameters(), 
+                                lr=self.lr,
+                                momentum=self.momentum, 
+                                weight_decay=self.weight_decay
+                               )
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, self.max_epochs)
         return [optim], [self.scheduler]
     
+
+class BartonTwins(BenchmarkModule):
+    '''
+    adopted from: 
+            https://github.com/IgorSusmelj/barlowtwins
+    '''
+    def __init__(self, dataloader_kNN,
+                 gpus, 
+                 classes=10, 
+                 knn_k=200, 
+                 knn_t=0.1, 
+                 max_epochs=100,
+                 backbone_type='resnet-18',
+                 num_ftrs=512,
+                 num_mlp_layers=3,
+                 momentum=0.9,
+                 weight_decay=5e-4,
+                 lr=1e-3                
+                ):
+        super().__init__(dataloader_kNN, gpus, classes, knn_k, knn_t)
+        
+        self.lr = lr
+        self.weight_decay = weight_decay
+        self.momentum = momentum
+        self.max_epochs = max_epochs
+        
+        # create a ResNet backbone and remove the classification head
+        resnet = lightly.models.ResNetGenerator(backbone_type)
+        self.backbone = nn.Sequential(
+            *list(resnet.children())[:-1],
+            nn.AdaptiveAvgPool2d(1),
+        )
+        # create a simsiam model based on ResNet
+        # note that bartontwins has the same architecture
+        self.resnet_simsiam = lightly.models.SimSiam(self.backbone, 
+                                                     num_ftrs=num_ftrs, 
+                                                     num_mlp_layers=num_mlp_layers)
     
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.criterion = BarlowTwinsLoss(device=device)
+            
+    def forward(self, x):
+        self.resnet_simsiam(x)
+
+    def training_step(self, batch, batch_idx):
+        (x0, x1), _, _ = batch
+        x0, x1 = self.resnet_simsiam(x0, x1)
+        # our simsiam model returns both (features + projection head)
+        z_a, _ = x0
+        z_b, _ = x1
+        loss = self.criterion(z_a, z_b)
+        self.log('train_loss_ssl', loss)
+        return loss
+
+    # learning rate warm-up
+    def optimizer_steps(self,
+                        epoch=None,
+                        batch_idx=None,
+                        optimizer=None,
+                        optimizer_idx=None,
+                        optimizer_closure=None,
+                        on_tpu=None,
+                        using_native_amp=None,
+                        using_lbfgs=None):
+        # 120 steps ~ 1 epoch
+        if self.trainer.global_step < 1000:
+            lr_scale = min(1., float(self.trainer.global_step + 1) / 1000.)
+            for pg in optimizer.param_groups:
+                pg['lr'] = lr_scale * self.lr
+
+        # update params
+        optimizer.step()
+        optimizer.zero_grad()
+
+    def configure_optimizers(self):
+        optim = torch.optim.SGD(self.resnet_simsiam.parameters(), 
+                                lr=self.lr,
+                                momentum=self.momentum, 
+                                weight_decay=self.weight_decay)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, self.max_epochs)
+        return [optim], [scheduler]
+
+    
+
+class BarlowTwinsLoss(torch.nn.Module):
+    def __init__(self, device, lambda_param=5e-3):
+        super(BarlowTwinsLoss, self).__init__()
+        self.lambda_param = lambda_param
+        self.device = device
+
+    def forward(self, z_a: torch.Tensor, z_b: torch.Tensor):
+        # normalize repr. along the batch dimension
+        z_a_norm = (z_a - z_a.mean(0)) / z_a.std(0) # NxD
+        z_b_norm = (z_b - z_b.mean(0)) / z_b.std(0) # NxD
+
+        N = z_a.size(0)
+        D = z_a.size(1)
+
+        # cross-correlation matrix
+        c = torch.mm(z_a_norm.T, z_b_norm) / N # DxD
+        # loss
+        c_diff = (c - torch.eye(D,device=self.device)).pow(2) # DxD
+        # multiply off-diagonal elems of c_diff by lambda
+        c_diff[~torch.eye(D, dtype=bool)] *= self.lambda_param
+        loss = c_diff.sum()
+
+        return loss
+
 class Classifier(pl.LightningModule):
     def __init__(self, model, lr=30., max_epochs=100):
         super().__init__()
