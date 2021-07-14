@@ -183,6 +183,19 @@ class BarlowTwinsLoss(torch.nn.Module):
 
         return loss
 
+    
+class SimpleResnet(pl.LightningModule):
+    def __init__(self, backbone_type='resnet-18'):
+        super().__init__()
+        
+        # create a ResNet backbone and remove the classification head
+        self.resnet = lightly.models.ResNetGenerator(backbone_type, 1, num_splits=8)
+        self.backbone = nn.Sequential(
+            *list(self.resnet.children())[:-1],
+            nn.AdaptiveAvgPool2d(1),
+        )
+        
+        
 class Classifier(pl.LightningModule):
     def __init__(self, model, lr=30., max_epochs=100):
         super().__init__()
@@ -191,10 +204,10 @@ class Classifier(pl.LightningModule):
         self.max_epochs = max_epochs
         
         # create a moco based on ResNet
-        self.resnet_moco = model
+        self.resnet_ssl = model
 
         # freeze the layers of moco
-        for p in self.resnet_moco.parameters():  # reset requires_grad
+        for p in self.resnet_ssl.parameters():  # reset requires_grad
             p.requires_grad = False
 
         # we create a linear layer for our downstream classification
@@ -205,7 +218,7 @@ class Classifier(pl.LightningModule):
 
     def forward(self, x):
         with torch.no_grad():
-            y_hat = self.resnet_moco.backbone(x).squeeze()
+            y_hat = self.resnet_ssl.backbone(x).squeeze()
             y_hat = nn.functional.normalize(y_hat, dim=1)
         y_hat = self.fc(y_hat)
         return y_hat
@@ -218,7 +231,7 @@ class Classifier(pl.LightningModule):
                 name, params, self.current_epoch)
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, _ = batch
         y_hat = self.forward(x)
         loss = nn.functional.cross_entropy(y_hat, y)
         self.log('train_loss_fc', loss)
@@ -229,7 +242,7 @@ class Classifier(pl.LightningModule):
         self.custom_histogram_weights()
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, _ = batch
         y_hat = self.forward(x)
         y_hat = torch.nn.functional.softmax(y_hat, dim=1)
         self.accuracy(y_hat, y)
