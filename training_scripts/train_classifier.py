@@ -1,6 +1,5 @@
 import argparse
 from pathlib import Path
-from os.path import exists
 
 import torch
 import torch.nn as nn
@@ -56,22 +55,12 @@ parser.add_argument('--knn-t', default=0.1, type=float, metavar='N',
 
 args = parser.parse_args()
 
-path_ = f'CIFAR10_noisy_checkpoints/cifar10_noise_{args.noise_type}_{str(args.noise_rate)}.pkl'
-if exists(path_):
-    # loads previously generated dataset for re-use
-    print(f'loads previously generated dataset from: {path_}')
-    dataset_train_classifier = NoisyCIFAR10.load_(path_)
-else:
-    dataset_train_classifier = NoisyCIFAR10(root=args.data, 
+dataset_train_classifier = NoisyCIFAR10(root=args.data, 
                                        train=True, 
                                        download=True, 
                                        noise_type=args.noise_type, 
                                        noise_rate=args.noise_rate, 
                                        transform=train_classifier_transforms)
-
-    # save dataset as a pickle for re-use
-    print(f'stores noisy dataset at {path_} for future re-use')
-    dataset_train_classifier.dump_(path_)
 
 dataset_train_kNN = NoisyCIFAR10(root=args.data, 
                                        train=True, 
