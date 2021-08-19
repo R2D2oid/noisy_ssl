@@ -8,6 +8,8 @@ import torchvision
 import lightly
 import pytorch_lightning as pl
 
+import sys
+sys.path.append("..")
 from dataloader import NoisyCIFAR10
 from transforms import train_classifier_transforms, test_transforms
 from models import Classifier, MocoModel, SimpleResnet, BartonTwins

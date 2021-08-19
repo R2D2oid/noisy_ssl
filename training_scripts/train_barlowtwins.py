@@ -11,6 +11,8 @@ import lightly
 import argparse
 from pathlib import Path
 
+import sys
+sys.path.append("..")
 from dataloader import NoisyCIFAR10
 from models import BarlowTwinsLoss, BartonTwins
 from transforms import train_classifier_transforms, test_transforms

@@ -6,6 +6,10 @@ import lightly
 import pytorch_lightning as pl
 from pathlib import Path
 
+import sys
+import os.path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from dataloader import NoisyCIFAR10
 from models import MocoModel
 
@@ -41,20 +45,24 @@ parser.add_argument('--crop-size', default=32, type=int, metavar='N',
 
 args = parser.parse_args()
 
+print(args)
+print('locading cifar dataset')
 # load train/test data
 dataset_train_moco = NoisyCIFAR10(root=args.data, 
                        train=True, 
                        download=True, 
                        noise_rate=0.0 # contrastive training of MoCo does not use labels so the noise-rate is irrelevant
                     )
+print('creating dataloader')
 dataset_train_moco = lightly.data.LightlyDataset.from_torch_dataset(dataset=dataset_train_moco) 
 
+print('done creating loader')
 # # MoCo v2 uses SimCLR augmentations, additionally, disable blur
 collate_fn = lightly.data.SimCLRCollateFunction(
     input_size=args.crop_size,
     gaussian_blur=0.,
 )
-
+print('1111')
 dataloader_train_moco = torch.utils.data.DataLoader(
     dataset_train_moco,
     batch_size=args.batch_size,
@@ -79,10 +87,12 @@ model = MocoModel(backbone_type = args.backbone_model,
                 loss_temperature=args.loss_temperature
                 )
 
+print('trainer')
 trainer = pl.Trainer(max_epochs=args.max_epochs, 
                      gpus=gpus, 
                      progress_bar_refresh_rate=args.progress_refresh_rate
                     )
+print('training')
 trainer.fit(
     model,
     dataloader_train_moco
