@@ -118,7 +118,7 @@ if args.pretrained_ssl_model == 'moco':
     model = MocoModel()
     model = model.load_from_checkpoint(args.checkpoint)
     model.eval()
-    classifier = Classifier(model.resnet_moco)
+    classifier = Classifier(model.resnet_moco, lr=30., max_epochs=args.max_epochs)
 elif args.pretrained_ssl_model == 'barlowtwins':
     print('Loading BarlowTwins Model')
     # load BarlowTwins model
