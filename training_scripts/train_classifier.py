@@ -9,7 +9,9 @@ import lightly
 import pytorch_lightning as pl
 
 import sys
-sys.path.append("..")
+import os.path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from dataloader import NoisyCIFAR10
 from transforms import train_classifier_transforms, test_transforms
 from models import Classifier, MocoModel, SimpleResnet, BartonTwins

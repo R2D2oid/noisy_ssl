@@ -12,7 +12,9 @@ import argparse
 from pathlib import Path
 
 import sys
-sys.path.append("..")
+import os.path
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from dataloader import NoisyCIFAR10
 from models import BarlowTwinsLoss, BartonTwins
 from transforms import train_classifier_transforms, test_transforms
