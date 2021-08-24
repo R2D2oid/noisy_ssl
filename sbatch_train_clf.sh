@@ -9,4 +9,4 @@ noise_type="$1"         #"sym"
 noise_rate="$2"         #"0.1"
 pretrain_type="$3"      # "barlowtwins" "moco"
 
-bash run_experiments_clf.sh $noise_type $noise_rate $pretrain_type
+bash run_train_clf.sh $noise_type $noise_rate $pretrain_type
