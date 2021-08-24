@@ -11,15 +11,29 @@ export DATA_DIR="data"
 ###### SSL Training #######
 ###########################
 
-# train moco with resnet-18 -> lightening_logs/moco-resnet18-b512-e100
-python training_scripts/train_moco.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
+export EXP_DIR=lightning_logs/"moco_resnet18_b"$BATCH_SIZE"_e"$MAX_EPOCH_SSL
+if [ -d "$EXP_DIR" ]; then
+        echo $EXP_DIR" already exists!"
+else
+	echo "*** Runing experiment"
+	echo "python training_scripts/train_moco.py --max-epochs "$MAX_EPOCH_SSL" --batch-size "$BATCH_SIZE" --backbone-model resnet-18 --num-fltrs "$NUM_FLTRS" --progress-refresh-rate 1 --data "$DATA_DIR
+	# train moco with resnet-18 -> lightening_logs/moco-resnet18-b512-e100
+	python training_scripts/train_moco.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
 
-mv lightning_logs/version_0 lightning_logs/"moco_resnet18_b"$BATCH_SIZE"_e"$MAX_EPOCH_SSL
+	mv lightning_logs/version_* $EXP_DIR
+fi
 
-# train barlowtwins with resnet-18 -> lightening_logs/bt-resnet18-b512-e100
-python training_scripts/train_barlowtwins.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
+export EXP_DIR=lightning_logs/"bt_resnet18_b"$BATCH_SIZE"_e"$MAX_EPOCH_SSL
+if [ -d "$EXP_DIR" ]; then
+        echo $EXP_DIR" already exists!"
+else
+	echo "*** Runing experiment"
+	echo "python training_scripts/train_barlowtwins.py --max-epochs "$MAX_EPOCH_SSL" --batch-size "$BATCH_SIZE" --backbone-model resnet-18 --num-fltrs "$NUM_FLTRS" --progress-refresh-rate 1 --data "$DATA_DIR
+	# train barlowtwins with resnet-18 -> lightening_logs/bt-resnet18-b512-e100
+	python training_scripts/train_barlowtwins.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
 
-mv lightning_logs/version_0 lightning_logs/"bt_resnet18_b"$BATCH_SIZE"_e"$MAX_EPOCH_SSL
+	mv lightning_logs/version_* $EXP_DIR
+fi
 
 ###############################################
 ############ Classifier training ##############
