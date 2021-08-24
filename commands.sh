@@ -10,12 +10,7 @@ sbatch run_experiments_pretrain_ssl.sh barlowtwins
 ########### Train Classifier #############
 ##########################################
 
-# the output of pretrained model should be present before classifiers can be trained
-
-# run classifier jobs sequentially
-# bash slurm_seq_jobs.sh 
-
-## OR
+# note: the output of pretrained model should be present before classifiers can be trained
 
 # train classifier using pretrained moco 
 sbatch sbatch_train_clf.sh non 0.0 moco
