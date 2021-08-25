@@ -14,6 +14,7 @@ DATA_DIR="data"
 noise_type="$1"		#"sym"
 noise_rate="$2"		#"0.1"
 pretrain_type="$3" 	# "barlowtwins" "moco"
+MAX_EPOCH_CLF=${4:-300}
 
 source env_ssl/bin/activate
 
