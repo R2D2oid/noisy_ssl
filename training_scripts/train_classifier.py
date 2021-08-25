@@ -140,11 +140,11 @@ elif args.pretrained_ssl_model == 'barlowtwins':
                         weight_decay=args.weight_decay)
     model = model.load_from_checkpoint(args.checkpoint, dataloader_kNN=dataloader_train_kNN, gpus=gpus)
     model.eval()
-    classifier = Classifier(model.resnet_simsiam)
+    classifier = Classifier(model.resnet_simsiam, lr=30., max_epochs=args.max_epochs)
 elif args.pretrained_ssl_model == 'only_supervised':
     model = SimpleResnet()
     model.eval()
-    classifier = Classifier(model)
+    classifier = Classifier(model, lr=30., max_epochs=args.max_epochs)
 else:
     raise NotImplementedError(f'Undefined {args.pretrained_ssl_model}')
     
