@@ -135,3 +135,4 @@ interactive_slurm_job.sh
 lightning_logs/
 slurm-*.out
 data/
+CIFAR10_noisy_checkpoints/*.pkl
