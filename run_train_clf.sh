@@ -16,7 +16,10 @@ noise_rate="$2"		#"0.1"
 pretrain_type="$3" 	# "barlowtwins" "moco"
 MAX_EPOCH_CLF=${4:-300}
 
+#module load python/3.6
+#virtualenv --system-site-packages -p python3 env_ssl
 source env_ssl/bin/activate
+#pip install -r requirements.txt
 
 SSL_MODEL_CHECKPOINT_PATH="lightning_logs/"$pretrain_type"_resnet18_b"$BATCH_SIZE"_e"$MAX_EPOCH_SSL"/checkpoints/epoch\=199-step\=19399.ckpt"
 EXP_NAME="clf_"$pretrain_type"_resnet18_b"$BATCH_SIZE"_e"$MAX_EPOCH_CLF"_"$noise_type"_"$noise_rate

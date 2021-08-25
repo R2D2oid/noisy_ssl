@@ -5,7 +5,10 @@
 #SBATCH --mem=30G            
 #SBATCH --time=0-12:00   
 
+#module load python/3.6
+#virtualenv --system-site-packages -p python3 env_ssl
 source env_ssl/bin/activate
+#pip install -r requirements.txt
 
 export MAX_EPOCH_SSL=200
 export MAX_EPOCH_WO_SSL=1000
