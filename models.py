@@ -197,7 +197,7 @@ class SimpleResnet(pl.LightningModule):
         
         
 class Classifier(pl.LightningModule):
-    def __init__(self, model, lr=30., max_epochs=100):
+    def __init__(self, model, lr=30., max_epochs=100, freeze_backbone=True):
         super().__init__()
         
         self.lr = lr
@@ -206,9 +206,10 @@ class Classifier(pl.LightningModule):
         # create a moco based on ResNet
         self.resnet_ssl = model
 
-        # freeze the layers of moco
-        for p in self.resnet_ssl.parameters():  # reset requires_grad
-            p.requires_grad = False
+        if freeze_backbone==True:
+            # freeze the layers of moco
+            for p in self.resnet_ssl.parameters():  # reset requires_grad
+                p.requires_grad = False
 
         # we create a linear layer for our downstream classification
         # model

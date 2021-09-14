@@ -144,7 +144,7 @@ elif args.pretrained_ssl_model == 'barlowtwins':
 elif args.pretrained_ssl_model == 'only_supervised':
     model = SimpleResnet()
     model.eval()
-    classifier = Classifier(model, lr=30., max_epochs=args.max_epochs)
+    classifier = Classifier(model, lr=30., max_epochs=args.max_epochs, freeze_backbone=False)
 else:
     raise NotImplementedError(f'Undefined {args.pretrained_ssl_model}')
     
