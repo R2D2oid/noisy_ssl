@@ -29,10 +29,10 @@ if [ -d "$EXP_DIR" ]; then
 else
 	echo "*** Runing experiment "$SLURM_JOBID"..."
 
-	if [$pretrain_type="moco"]; then
+	if [ $pretrain_type == "moco" ]; then
 		echo "python training_scripts/train_moco.py --max-epochs "$MAX_EPOCH_SSL" --batch-size "$BATCH_SIZE" --backbone-model resnet-18 --num-fltrs "$NUM_FLTRS" --progress-refresh-rate 1 --data "$DATA_DIR
 		python training_scripts/train_moco.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
-	elif [$pretrain_type="barlowtwins"]; then
+	elif [ $pretrain_type == "barlowtwins" ]; then
 		echo "python training_scripts/train_barlowtwins.py --max-epochs "$MAX_EPOCH_SSL" --batch-size "$BATCH_SIZE" --backbone-model resnet-18 --num-fltrs "$NUM_FLTRS" --progress-refresh-rate 1 --data "$DATA_DIR
 		python training_scripts/train_barlowtwins.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
 	else
