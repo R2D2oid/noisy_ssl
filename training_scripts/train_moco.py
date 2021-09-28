@@ -53,10 +53,14 @@ dataset_train_moco = NoisyCIFAR10(root=args.data,
                     )
 dataset_train_moco = lightly.data.LightlyDataset.from_torch_dataset(dataset=dataset_train_moco) 
 
+cifar10_mean = [0.4914, 0.4822, 0.4465]
+cifar10_std = [0.2470, 0.2435, 0.2616]
+
 # # MoCo v2 uses SimCLR augmentations, additionally, disable blur
 collate_fn = lightly.data.SimCLRCollateFunction(
     input_size=args.crop_size,
     gaussian_blur=0.,
+    normalize={'mean':cifar10_mean,'std':cifar10_std}
 )
 dataloader_train_moco = torch.utils.data.DataLoader(
     dataset_train_moco,

@@ -2,16 +2,16 @@
 #SBATCH --account=def-mudl
 #SBATCH --nodes 1              
 #SBATCH --gres=gpu:1           
-#SBATCH --mem=30G            
-#SBATCH --time=0-12:00   
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=24G            
+#SBATCH --time=0-23:00   
 
 #module load python/3.6
 #virtualenv --system-site-packages -p python3 env_ssl
 source env_ssl/bin/activate
 #pip install -r requirements.txt
 
-export MAX_EPOCH_SSL=200
-export MAX_EPOCH_WO_SSL=1000
+export MAX_EPOCH_SSL=1200
 export BATCH_SIZE=512
 export NUM_FLTRS=512
 export DATA_DIR="data"
@@ -30,10 +30,10 @@ if [ -d "$EXP_DIR" ]; then
 else
 	echo "*** Runing experiment "$SLURM_JOBID"..."
 
-	if [$pretrain_type=="moco"]; then
+	if [ $pretrain_type == "moco" ]; then
 		echo "python training_scripts/train_moco.py --max-epochs "$MAX_EPOCH_SSL" --batch-size "$BATCH_SIZE" --backbone-model resnet-18 --num-fltrs "$NUM_FLTRS" --progress-refresh-rate 1 --data "$DATA_DIR
 		python training_scripts/train_moco.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
-	elif [$pretrain_type=="barlowtwins"]; then
+	elif [ $pretrain_type == "barlowtwins" ]; then
 		echo "python training_scripts/train_barlowtwins.py --max-epochs "$MAX_EPOCH_SSL" --batch-size "$BATCH_SIZE" --backbone-model resnet-18 --num-fltrs "$NUM_FLTRS" --progress-refresh-rate 1 --data "$DATA_DIR
 		python training_scripts/train_barlowtwins.py --max-epochs $MAX_EPOCH_SSL --batch-size $BATCH_SIZE --backbone-model resnet-18 --num-fltrs $NUM_FLTRS --progress-refresh-rate 1 --data $DATA_DIR
 	else
