@@ -34,3 +34,9 @@ python training_scripts/train_classifier.py --max-epochs 100 --batch-size 512 --
 # train classifier on resnet-18 without ssl
 python training_scripts/train_classifier.py --max-epochs 100 --batch-size 512 --backbone-model resnet-18 --num-fltrs 512 --progress-refresh-rate 1 --pretrained-ssl-model only_supervised             
 ```
+
+
+### Supervised Training
+```
+bash run_train_clf_sup.sh non 0.0 supervised 100 pre
+```
