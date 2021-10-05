@@ -79,7 +79,23 @@ class NoisyCIFAR10(datasets.CIFAR10):
 
 # Usage 
 # from NoisyCIFAR10Dataset import NoisyCIFAR10
-# cifar10_dataset = NoisyCIFAR10(root='./data', train=True, download=True, noise_type = 'sym', noise_rate=0.2, split_ratio=0.0)
+# from transforms import train_classifier_transforms, test_transforms
+
+# dataset_train_classifier = NoisyCIFAR10(root='./data', 
+#                                         train=True, 
+#                                         download=True, 
+#                                         noise_type='sym', 
+#                                         noise_rate=0.1, 
+#                                         transform=train_classifier_transforms,
+#                                         split_ratio=0.0)
+
+
+# dataset_test = NoisyCIFAR10(root='./data', 
+#                             train=False, 
+#                             download=True,
+#                             noise_rate=0.0,
+#                             transform=test_transforms)
+
 
 ## if split_ratio is not zero, the pretraining split can be obtained as 
 # pretrain_dataset = noisy_dataset.pretrn_cifar10
