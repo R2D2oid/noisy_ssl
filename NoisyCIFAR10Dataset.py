@@ -7,6 +7,9 @@ class NoisyCIFAR10(datasets.CIFAR10):
     def __init__(self, root, train=True, download=False, transform=None, noise_type='sym', noise_rate=0.1, split_ratio=0.0):
         super(NoisyCIFAR10, self).__init__(root, train=train, download=download, transform=transform)
         
+        random.seed(42)
+        np.random.seed(42)
+
         self.transform = transforms.ToTensor() if transform is None else transform
         self.split_ratio = split_ratio
         
@@ -42,9 +45,6 @@ class NoisyCIFAR10(datasets.CIFAR10):
         ## add noise to clf split
         self.noise_rate = noise_rate
         self.noise_type = noise_type
-        
-        random.seed(42)
-        np.random.seed(42)
 
         if noise_rate <= 0:
             return
